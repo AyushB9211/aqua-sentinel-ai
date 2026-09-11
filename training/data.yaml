@@ -1,0 +1,6 @@
+names:
+  0: shipwreck
+nc: 1
+path: C:/SeaSentinelAI/training/dataset
+train: images/train
+val: images/val
