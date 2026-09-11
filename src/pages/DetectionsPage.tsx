@@ -23,6 +23,7 @@ import { DetectionDetailModal } from '../components/dashboard/DetectionDetailMod
 import { RECENT_DETECTIONS } from '../data/mockData';
 import { SonarDetection, SeverityLevel } from '../types/marine';
 import { formatCoordinatesDec } from '../utils/formatters';
+import { exportReportAsCsv, exportReportAsJson } from '../utils/exportUtils';
 
 export const DetectionsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -147,14 +148,38 @@ export const DetectionsPage: React.FC = () => {
           </h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <Button
             variant="secondary"
             size="sm"
             icon={Download}
-            onClick={() => alert('Exporting georeferenced detection dataset to CSV...')}
+            onClick={() => exportReportAsCsv(filteredDetections)}
           >
             Export CSV
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            icon={Download}
+            onClick={() =>
+              exportReportAsJson(
+                {
+                  id: 'scan-db-001',
+                  scanId: 'SAGAR-DETECTION-DB',
+                  fileName: 'Sonar_Detection_Database.png',
+                  imageUrl: '',
+                  surveyCode: 'MS-0048',
+                  vessel: 'ORV Sagar Nidhi',
+                  waterDepth: 142.6,
+                  sonarFrequencyKhz: 900,
+                  rangeMeters: 150,
+                  resolution: '1920x1080',
+                },
+                filteredDetections
+              )
+            }
+          >
+            Export JSON
           </Button>
         </div>
       </div>

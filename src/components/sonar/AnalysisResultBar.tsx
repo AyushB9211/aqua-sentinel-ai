@@ -1,5 +1,5 @@
 import React from 'react';
-import { RotateCcw, Download } from 'lucide-react';
+import { RotateCcw, Download, FileSpreadsheet } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { SonarDetection } from '../../types/marine';
 import { cn } from '../../utils/cn';
@@ -8,6 +8,7 @@ export interface AnalysisResultBarProps {
   detections: SonarDetection[];
   onReRunAnalysis: () => void;
   onExportResults: () => void;
+  onExportCsv?: () => void;
   className?: string;
 }
 
@@ -15,6 +16,7 @@ export const AnalysisResultBar: React.FC<AnalysisResultBarProps> = ({
   detections,
   onReRunAnalysis,
   onExportResults,
+  onExportCsv,
   className,
 }) => {
   const highPriorityCount = detections.filter((d) => d.priority === 'HIGH').length;
@@ -88,6 +90,12 @@ export const AnalysisResultBar: React.FC<AnalysisResultBarProps> = ({
         <Button variant="secondary" size="xs" icon={RotateCcw} onClick={onReRunAnalysis}>
           Re-run
         </Button>
+
+        {onExportCsv && (
+          <Button variant="secondary" size="xs" icon={FileSpreadsheet} onClick={onExportCsv}>
+            Export CSV
+          </Button>
+        )}
 
         <Button variant="primary" size="xs" icon={Download} onClick={onExportResults}>
           Export JSON

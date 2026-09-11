@@ -11,7 +11,8 @@ import {
 } from 'lucide-react';
 import { Card, CardHeader } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { ACTIVE_MISSION } from '../data/mockData';
+import { ACTIVE_MISSION, RECENT_DETECTIONS } from '../data/mockData';
+import { exportReportAsCsv, exportReportAsJson } from '../utils/exportUtils';
 
 export const ReportsPage: React.FC = () => {
   const reports = [
@@ -94,14 +95,38 @@ export const ReportsPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={Download}
+                onClick={() => exportReportAsCsv(RECENT_DETECTIONS)}
+              >
+                Export CSV
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
                 icon={Download}
-                onClick={() => alert(`Downloading ${rep.id} PDF package...`)}
+                onClick={() =>
+                  exportReportAsJson(
+                    {
+                      id: rep.id,
+                      scanId: rep.id,
+                      fileName: `${rep.id}_Survey_Report.png`,
+                      imageUrl: '',
+                      surveyCode: 'MS-0048',
+                      vessel: 'ORV Sagar Nidhi',
+                      waterDepth: 142.6,
+                      sonarFrequencyKhz: 900,
+                      rangeMeters: 150,
+                      resolution: '1920x1080',
+                    },
+                    RECENT_DETECTIONS
+                  )
+                }
               >
-                Download PDF
+                Export JSON
               </Button>
             </div>
           </Card>

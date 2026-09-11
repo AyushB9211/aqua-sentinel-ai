@@ -8,6 +8,7 @@ import { AnalysisResultBar } from '../components/sonar/AnalysisResultBar';
 import { ImportScanModal } from '../components/sonar/ImportScanModal';
 import { useDemo } from '../context/DemoContext';
 import { SonarDetection } from '../types/marine';
+import { exportReportAsCsv, exportReportAsJson } from '../utils/exportUtils';
 
 export interface SonarAnalysisPageProps {
   onNavigate?: (routeId: string) => void;
@@ -34,27 +35,15 @@ export const SonarAnalysisPage: React.FC<SonarAnalysisPageProps> = ({ onNavigate
 
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
-  const handleExportResults = () => {
-    const payload = JSON.stringify(
-      {
-        scanMetadata,
-        analysisModel: 'SeaSentinel YOLO v1',
-        inferenceFps: 32.4,
-        processingTimeSeconds: 3.0,
-        totalObjects: detections.length,
-        detections,
-      },
-      null,
-      2
-    );
+  const handleExportJson = () => {
+    exportReportAsJson(scanMetadata, detections, {
+      inferenceFps: 32.4,
+      processingTimeSeconds: 2.8,
+    });
+  };
 
-    const blob = new Blob([payload], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${scanMetadata.scanId}_SeaSentinel_Detections.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+  const handleExportCsv = () => {
+    exportReportAsCsv(detections);
   };
 
   const handleViewOnMap = (det: SonarDetection) => {
@@ -162,7 +151,8 @@ export const SonarAnalysisPage: React.FC<SonarAnalysisPageProps> = ({ onNavigate
         <AnalysisResultBar
           detections={detections}
           onReRunAnalysis={runAnalysis}
-          onExportResults={handleExportResults}
+          onExportResults={handleExportJson}
+          onExportCsv={handleExportCsv}
         />
       )}
 
