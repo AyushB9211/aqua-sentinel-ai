@@ -147,17 +147,17 @@ export const DesignSystemPreview: React.FC = () => {
 
   return (
     <div className="space-y-10 pb-16">
-      {/* 1. Page Header & SeaSentinel AI Brand Banner */}
+      {/* 1. Page Header & AquaSentinel AI Brand Banner */}
       <div className="relative p-6 sm:p-8 rounded-lg bg-gradient-to-r from-marine-900 via-marine-850 to-marine-900 border border-cyan-500/30 overflow-hidden shadow-2xl corner-brackets">
         <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_top_right,rgba(6,182,212,0.15),transparent_70%)] pointer-events-none" />
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            {/* Official SeaSentinel AI Logo Artwork */}
+            {/* Official AquaSentinel AI Logo Artwork */}
             <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-marine-950/80 border border-cyan-500/40 p-2 shrink-0 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.3)]">
               <img
                 src={seasentialLogo}
-                alt="SeaSentinel AI Official Logo"
+                alt="AquaSentinel AI Official Logo"
                 className="w-full h-full object-contain"
               />
             </div>
@@ -165,7 +165,7 @@ export const DesignSystemPreview: React.FC = () => {
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <span className="px-2.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 text-xs font-mono font-bold tracking-wider">
-                  SeaSentinel AI
+                  AquaSentinel AI
                 </span>
                 <span className="px-2.5 py-0.5 rounded bg-marine-800 text-slate-300 border border-marine-700 text-xs font-mono">
                   SIH 26057

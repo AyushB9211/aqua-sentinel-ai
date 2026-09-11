@@ -260,7 +260,7 @@ export const LaunchScreen: React.FC<LaunchScreenProps> = ({
 
           <img
             src={seasentinelLogo}
-            alt="SeaSentinel AI - Official Project Logo (SIH 26057)"
+            alt="AquaSentinel AI - Official Project Logo (SIH 26057)"
             className="relative z-10 w-64 sm:w-80 md:w-96 h-auto object-contain drop-shadow-[0_0_25px_rgba(6,182,212,0.35)]"
           />
         </div>
@@ -276,12 +276,12 @@ export const LaunchScreen: React.FC<LaunchScreenProps> = ({
         >
           {/* Official Tagline */}
           <div className="text-sm sm:text-base md:text-lg font-bold tracking-[0.25em] text-cyan-300 font-mono uppercase drop-shadow-[0_0_12px_rgba(6,182,212,0.6)]">
-            SEE BENEATH. DETECT BEYOND.
+            DETECT • EXPLORE • PROTECT
           </div>
 
           {/* Subtitle */}
           <div className="text-[11px] sm:text-xs font-semibold tracking-widest text-slate-400 uppercase font-mono">
-            AI-POWERED UNDERWATER INTELLIGENCE
+            AI FOR A SAFER OCEAN
           </div>
         </div>
 

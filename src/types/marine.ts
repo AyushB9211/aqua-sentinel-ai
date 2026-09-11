@@ -39,6 +39,13 @@ export interface BoundingBox {
   confidence: number;
   shadowLength: number;
   depth?: number;
+  trackingId?: string;
+  boxPixels?: {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+  };
 }
 
 export interface SonarEvidence {
@@ -67,6 +74,12 @@ export interface SonarDetection {
   acousticShadowLength: number; // meters
   regionText?: string; // e.g. "Right sonar swath", "Center-left"
   objectType?: string; // e.g. "Shipwreck", "Marine Debris"
+  boxPixels?: {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+  };
   evidence?: SonarEvidence;
   evidenceChecklist?: string[];
   estimatedDimensions: {

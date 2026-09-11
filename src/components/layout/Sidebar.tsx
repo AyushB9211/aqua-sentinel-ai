@@ -53,14 +53,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
           isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
-        {/* Brand Header with Official SeaSentinel AI Logo */}
+        {/* Brand Header with Official AquaSentinel AI Logo */}
         <div className="h-16 flex items-center justify-between px-3.5 border-b border-marine-800/90 bg-marine-950/95">
           <div className="flex items-center gap-2.5 min-w-0">
             {/* Logo Emblem */}
-            <div className="relative w-9 h-9 rounded-lg bg-marine-900 border border-cyan-500/40 p-1 flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(6,182,212,0.3)] overflow-hidden">
+            <div className="relative w-10 h-10 rounded-lg bg-marine-900 border border-cyan-500/40 p-0.5 flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(6,182,212,0.3)] overflow-hidden">
               <img
                 src={seasentinelLogo}
-                alt="SeaSentinel AI"
+                alt="AquaSentinel AI"
                 className="w-full h-full object-contain"
               />
               <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
@@ -70,14 +70,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="font-extrabold tracking-tight text-white text-sm truncate uppercase font-mono">
-                    SeaSentinel <span className="text-cyan-400">AI</span>
+                    AquaSentinel <span className="text-cyan-400">AI</span>
                   </span>
                   <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40">
                     26057
                   </span>
                 </div>
                 <div className="text-[10px] text-cyan-400/90 font-medium truncate tracking-tight">
-                  SEE BENEATH. DETECT BEYOND.
+                  DETECT • EXPLORE • PROTECT
                 </div>
               </div>
             )}
