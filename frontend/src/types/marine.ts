@@ -34,6 +34,7 @@ export interface BoundingBox {
   width: number; // percentage
   height: number; // percentage
   label: string;
+  classId?: number;
   severity: SeverityLevel;
   priority?: 'HIGH' | 'MEDIUM' | 'LOW' | 'ANOMALY';
   confidence: number;
@@ -58,6 +59,7 @@ export interface SonarEvidence {
 export interface SonarDetection {
   id: string;
   trackingId: string; // e.g., "DET-2026-0842"
+  classId?: number; // 0: crab_pot, 1: submarine_pipeline, 2: shipwreck, 3: ghost_net, 4: mine_cylinder
   surveyId?: string; // e.g., "SSS_2025_05_21_001"
   dateString?: string; // e.g., "21 May 2025"
   timestamp: string;
