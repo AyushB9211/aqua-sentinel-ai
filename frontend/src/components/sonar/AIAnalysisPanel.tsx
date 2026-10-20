@@ -18,6 +18,7 @@ import {
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { SonarDetection, AnalysisState, InferenceDebugInfo } from '../../types/marine';
+import { getHazardStyle } from '../../utils/hazardUtils';
 import { cn } from '../../utils/cn';
 
 export interface AIAnalysisPanelProps {
@@ -247,8 +248,12 @@ export const AIAnalysisPanel: React.FC<AIAnalysisPanelProps> = ({
                 <span className="text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-wider">
                   Target Inspection ({primaryTarget.trackingId}/{detections.length.toString().padStart(2, '0')})
                 </span>
-                <div className="text-sm font-extrabold text-white font-mono uppercase mt-0.5">
-                  {primaryTarget.classification}
+                <div className="text-sm font-extrabold text-white font-mono uppercase mt-0.5 flex items-center gap-2">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0 shadow-sm"
+                    style={{ backgroundColor: getHazardStyle(primaryTarget.classification, primaryTarget.classId).stroke }}
+                  />
+                  <span>{getHazardStyle(primaryTarget.classification, primaryTarget.classId).label}</span>
                 </div>
                 {primaryTarget.regionText && (
                   <div className="text-[10px] font-mono text-slate-400 mt-0.5">
@@ -320,8 +325,12 @@ export const AIAnalysisPanel: React.FC<AIAnalysisPanelProps> = ({
                         )}
                       >
                         <div className="flex items-center gap-1.5">
+                          <span
+                            className="w-2 h-2 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: getHazardStyle(det.classification, det.classId).stroke }}
+                          />
                           <span className="text-cyan-400 font-bold">#{det.trackingId}</span>
-                          <span className="truncate">{det.classification}</span>
+                          <span className="truncate">{getHazardStyle(det.classification, det.classId).shortLabel}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-emerald-400 font-bold">{(det.confidence * 100).toFixed(0)}%</span>

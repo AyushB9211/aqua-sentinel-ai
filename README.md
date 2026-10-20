@@ -57,93 +57,127 @@ Traditional side-scan sonar interpretation is labor-intensive, subject to operat
 ## 5. Project Structure
 
 ```
-SeaSentinelAI/
-├── frontend/                    # React 18 + Vite + TypeScript command dashboard
-│   ├── src/                     # UI components, pages, services, styles
-│   ├── public/                  # Static assets & branding logos
-│   ├── package.json             # Frontend dependencies
-│   ├── vite.config.ts           # Vite configuration
-│   └── vercel.json              # Vercel deployment configuration
-├── backend/
-│   ├── main.py                  # FastAPI server (POST /predict)
-│   └── tiled_inference.py       # Tiled multi-scale inference engine
+MarineX/
+├── backend_main.py              # FastAPI backend with multi-scale YOLO inference & NMS
+├── requirements.txt             # Python backend dependencies
+├── package.json                 # Frontend dependencies and scripts
+├── vite.config.ts               # Vite bundler configuration
+├── tsconfig.json                # TypeScript compiler configuration
+├── vercel.json                  # Vercel SPA routing & rewrite rules
 ├── model/
-│   └── seasentinel_shipwreck.pt # Trained YOLOv8n acoustic model weights
-├── training/
-│   ├── prepare_dataset.py       # Dataset preprocessing & YOLO conversion
-│   ├── train_model.py           # Training pipeline
-│   ├── audit_dataset.py         # Dataset validation & label inspection
-│   ├── predict.py               # CLI inference script
-│   └── data.yaml                # YOLO dataset configuration
-├── requirements.txt             # Python dependencies
-├── .gitignore                   # Git exclusions
+│   └── seasentinel_shipwreck.pt # YOLO acoustic detection model weights
+├── public/                      # Static assets & branding icons
+├── src/
+│   ├── assets/                  # Brand assets & emblems
+│   ├── components/              # UI components (UploadZone, AnalysisResultBar, etc.)
+│   ├── pages/                   # App pages (SonarAnalysisPage, ReportsPage, etc.)
+│   ├── services/                # API and detection services (sonarDetectorService.ts)
+│   ├── utils/                   # Report generators & export utilities (exportUtils.ts)
+│   ├── types/                   # TypeScript interfaces and data models
+│   ├── App.tsx                  # Main application component
+│   └── main.tsx                 # Application entry point
+├── runs/                        # Model validation curves & performance metrics
 └── README.md                    # Project documentation
 ```
 
 ---
 
-## 6. How to Install
+## 6. How to Install & Configure for Teammates
 
 ### Prerequisites
 - **Node.js** (v18.0 or higher) & **npm**
 - **Python** (v3.10 or higher) with `pip`
 - **Git**
+- *(Optional)* **PostgreSQL** with PostGIS for telemetry persistence
 
-### Installation Steps
+### Step 1: Clone the Repository
+```bash
+git clone https://github.com/AyushB9211/aqua-sentinel-ai.git
+cd aqua-sentinel-ai
+```
 
-1. **Clone the repository:**
+### Step 2: Install Frontend Dependencies
+```bash
+npm install
+```
+
+### Step 3: Install Backend Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### Step 4: Environment Variables Setup
+Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+Key configurable environment variables (values are documented in `.env.example`):
+- `VITE_PORT`: Frontend port (defaults to `3000`).
+- `VITE_HOST`: Host interface (`0.0.0.0` or `127.0.0.1`).
+- `VITE_API_URL`: Backend endpoint URL (defaults to `http://localhost:8000/predict`).
+- `VITE_DB_URL`: PostgreSQL connection string (defaults to `postgresql://niot:oceanpass@localhost:5432/marinex_db`).
+- `SEASENTINEL_MODEL_PATH`: Absolute or relative path to your trained YOLOv8 weights (e.g. `weights/best.pt`).
+
+### Step 5: Model Weights Setup
+Trained model weights are kept out of ordinary Git commits to preserve repository speed.
+1. Place the trained `best.pt` model file into the `weights/` folder:
    ```bash
-   git clone https://github.com/AyushB9211/aqua-sentinel-ai.git
-   cd aqua-sentinel-ai
+   mkdir -p weights
+   # Copy best.pt into weights/best.pt
    ```
+2. The backend automatically searches in this order:
+   - `SEASENTINEL_MODEL_PATH` environment variable
+   - `./weights/best.pt`
+   - `./model/seasentinel_shipwreck.pt`
+   - `./model/best.pt`
+   - Base `yolov8n.pt`
 
-2. **Install Frontend Dependencies:**
-   ```bash
-   cd frontend
-   npm install
-   cd ..
-   ```
-
-3. **Install Backend Dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Step 6: (Optional) PostgreSQL Database Setup
+If using persistent telemetry logs:
+```bash
+# In PostgreSQL terminal:
+CREATE USER niot WITH PASSWORD 'oceanpass';
+CREATE DATABASE marinex_db OWNER niot;
+```
 
 ---
 
-## 7. How to Run the Frontend
+## 7. How to Run the Application
 
+### Option A: Running Both Concurrently
+Start the backend first, then the frontend:
+
+**Terminal 1 (FastAPI Backend):**
 ```bash
-cd frontend
+python backend_main.py
+# or:
+uvicorn backend_main:app --host 127.0.0.1 --port 8000 --reload
+```
+Interactive Swagger docs: `http://127.0.0.1:8000/docs`
+
+**Terminal 2 (React / Vite Frontend):**
+```bash
 npm run dev
 ```
-The application will be accessible at `http://localhost:3000`.
-
-To build for production:
-```bash
-npm run build
-```
+The website will open at `http://localhost:3000`.
 
 ---
 
-## 8. How to Run the Backend
+## 8. Five-Class Marine Hazard Support
 
-Start the FastAPI inference backend server:
-```bash
-python backend/main.py
-```
-Or via Uvicorn directly:
-```bash
-uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
-```
-Interactive API documentation will be available at `http://127.0.0.1:8000/docs`.
+SeaSentinel AI supports automated detection and morphological verification of 5 distinct underwater hazard classes:
+- **`0: CRAB_POT`** (`#f97316`, Orange) — Benthic rectilinear cage traps.
+- **`1: SUBMARINE_PIPELINE`** (`#06b6d4`, Cyan) — Continuous linear conduit infrastructure with flange joints.
+- **`2: SHIPWRECK`** (`#ef4444`, Red) — Large sunken vessel hulls and structural debris.
+- **`3: GHOST_NET`** (`#10b981`, Emerald) — Tangled abandoned/lost derelict fishing gear (ALDFG).
+- **`4: MINE_CYLINDER`** (`#d946ef`, Fuchsia) — Compact cylindrical ordnance and casing anomalies.
 
 ---
 
 ## 9. How to Use Sonar Image Upload
 
-1. Open the **Sonar Analysis** dashboard in your browser.
-2. Drag and drop any Side-Scan Sonar image (`.png`, `.jpg`, `.jpeg`, `.tiff`) or click **Browse Files**.
+1. Navigate to the **Sonar Analysis** workspace on the sidebar.
+2. Drag and drop any Side-Scan Sonar image (`.png`, `.jpg`, `.jpeg`, `.tiff`) into the central sonar stage or click **Browse Files**.
 3. Adjust the confidence threshold or tile sensitivity sliders if needed.
 4. Click **Run Sonar Analysis** to trigger the AI inference pipeline.
 5. Inspect the highlighted detection boxes, confidence score, bounding-box coordinates, and object telemetry.
@@ -203,7 +237,7 @@ Contains detailed telemetry, bounding boxes, confidence values, SNR estimates, a
 - **Architecture:** Ultralytics YOLOv8 (Compact Custom Acoustic Detector)
 - **Trained Classes:** `SHIPWRECK`, `MARINE_DEBRIS`, `SEABED_ANOMALY`
 - **Inference Resolution:** 1280px (Macro Scale) + 640px (Micro Tiled Patches)
-- **Weights File:** `model/seasentinel_shipwreck.pt` (~5.96 MB)
+- **Weights File:** `model/seasentinel_shipwreck.pt` (~6.2 MB)
 
 ---
 

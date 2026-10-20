@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { BoundingBox, AnalysisState } from '../../types/marine';
+import { getHazardStyle } from '../../utils/hazardUtils';
 import { cn } from '../../utils/cn';
 
 export interface SonarAnalysisViewerProps {
@@ -517,18 +518,17 @@ export const SonarAnalysisViewer: React.FC<SonarAnalysisViewerProps> = ({
                       const fontSize = Math.max(10, Math.min(14, originalDimensions.width * 0.009));
                       const labelH = fontSize * 1.4;
                       const trackingNum = obj.trackingId ? obj.trackingId : (idx + 1).toString().padStart(2, '0');
-                      const shortClass = (obj.label || 'WRECK').toUpperCase().replace('SHIPWRECK', 'WRECK');
+                      const hazard = getHazardStyle(obj.label, obj.classId);
+                      const shortClass = hazard.shortLabel;
                       const confText = `${(obj.confidence * 100).toFixed(0)}%`;
 
-                      const labelText =
-                        labelMode === 'full'
-                          ? `#${trackingNum} ${shortClass} ${confText}`
-                          : `#${trackingNum} ${shortClass} ${confText}`;
-
+                      const labelText = `#${trackingNum} ${shortClass} ${confText}`;
                       const labelW = labelText.length * fontSize * 0.58 + fontSize * 1.1;
 
-                      const strokeColor = isSelected ? '#38bdf8' : (obj.priority === 'HIGH' ? '#ef4444' : '#f59e0b');
-                      const fillColor = isSelected ? 'rgba(56, 189, 248, 0.20)' : (isHovered ? 'rgba(239, 68, 68, 0.18)' : 'rgba(239, 68, 68, 0.08)');
+                      const strokeColor = isSelected ? '#38bdf8' : hazard.stroke;
+                      const fillColor = isSelected
+                        ? 'rgba(56, 189, 248, 0.20)'
+                        : (isHovered ? hazard.fillHover : hazard.fill);
                       const strokeWidth = isSelected ? Math.max(2.5, originalDimensions.width * 0.0025) : Math.max(1.8, originalDimensions.width * 0.0018);
 
                       return {
@@ -773,6 +773,33 @@ export const SonarAnalysisViewer: React.FC<SonarAnalysisViewerProps> = ({
           <span>•</span>
           <span className="text-cyan-400">900 kHz HIGH-RES</span>
         </div>
+
+        {/* Sonar Hazard Class Legend */}
+        {imageUrl && (
+          <div className="absolute bottom-2.5 right-3 hidden md:flex items-center gap-2.5 text-[10px] font-mono bg-marine-950/90 backdrop-blur-sm px-2.5 py-0.5 rounded border border-marine-800 pointer-events-none z-10 shadow-lg">
+            <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Legend:</span>
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-[#ef4444]" />
+              <span className="text-red-300 font-medium">Shipwreck</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-[#06b6d4]" />
+              <span className="text-cyan-300 font-medium">Pipeline</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-[#10b981]" />
+              <span className="text-emerald-300 font-medium">Ghost Net</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-[#d946ef]" />
+              <span className="text-fuchsia-300 font-medium">Mine Cyl</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-[#f97316]" />
+              <span className="text-orange-300 font-medium">Crab Pot</span>
+            </div>
+          </div>
+        )}
       </div>
     </Card>
   );

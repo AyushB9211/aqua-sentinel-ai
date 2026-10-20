@@ -36,7 +36,7 @@ export function getReportTimestamp(): string {
 export function generateDetectionCsv(detections: SonarDetection[]): string {
   const headers = [
     'Detection ID',
-    'Timestamp',
+    'Class ID',
     'Class',
     'Confidence',
     'Severity',
@@ -68,8 +68,9 @@ export function generateDetectionCsv(detections: SonarDetection[]): string {
       timestamp = timestamp.replace('T', ' ').substring(0, 16);
     }
 
-    // 3. Class
-    const classification = (d.classification || 'SHIPWRECK').toUpperCase();
+    // 3. Class ID & Name
+    const classIdStr = d.classId !== undefined && d.classId !== null ? String(d.classId) : '';
+    const classification = (d.classification || 'ANOMALY').toUpperCase();
 
     // 4. Confidence (formatted as e.g. 53.4)
     let confidenceStr = '0.0';
@@ -82,7 +83,13 @@ export function generateDetectionCsv(detections: SonarDetection[]): string {
     const severity = (d.priority || d.severity || 'HIGH').toUpperCase();
 
     // 6. Object Type
-    const objectType = d.objectType || (classification === 'SHIPWRECK' ? 'Shipwreck Structure' : 'Marine Debris');
+    const objectType = d.objectType || (
+      classification === 'SHIPWRECK' ? 'Shipwreck Structure' :
+      classification === 'SUBMARINE_PIPELINE' ? 'Submarine Pipeline Segment' :
+      classification === 'GHOST_NET' ? 'Ghost Fishing Net' :
+      classification === 'MINE_CYLINDER' ? 'Mine Cylinder Anomaly' :
+      classification === 'CRAB_POT' ? 'Crab Pot Trap' : 'Acoustic Anomaly'
+    );
 
     // 7-10. Coordinates (X1, Y1, X2, Y2)
     const x1 = d.boxPixels?.x1 !== undefined ? Math.round(d.boxPixels.x1) : '';
@@ -92,7 +99,7 @@ export function generateDetectionCsv(detections: SonarDetection[]): string {
 
     return [
       escapeCsvCell(detectionId),
-      escapeCsvCell(timestamp),
+      escapeCsvCell(classIdStr),
       escapeCsvCell(classification),
       escapeCsvCell(confidenceStr),
       escapeCsvCell(severity),
