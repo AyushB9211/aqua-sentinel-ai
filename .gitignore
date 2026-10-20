@@ -51,3 +51,9 @@ Thumbs.db
 
 # TypeScript Cache
 *.tsbuildinfo
+
+# Model Weights, Training Runs & Backups
+weights/
+runs/
+*.bak
+*.pre_exp2_bak

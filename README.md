@@ -82,59 +82,95 @@ MarineX/
 
 ---
 
-## 6. How to Install
+## 6. How to Install & Configure for Teammates
 
 ### Prerequisites
 - **Node.js** (v18.0 or higher) & **npm**
 - **Python** (v3.10 or higher) with `pip`
 - **Git**
+- *(Optional)* **PostgreSQL** with PostGIS for telemetry persistence
 
-### Installation Steps
+### Step 1: Clone the Repository
+```bash
+git clone https://github.com/AyushB9211/aqua-sentinel-ai.git
+cd aqua-sentinel-ai
+```
 
-1. **Clone the repository:**
+### Step 2: Install Frontend Dependencies
+```bash
+npm install
+```
+
+### Step 3: Install Backend Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### Step 4: Environment Variables Setup
+Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+Key configurable environment variables (values are documented in `.env.example`):
+- `VITE_PORT`: Frontend port (defaults to `3000`).
+- `VITE_HOST`: Host interface (`0.0.0.0` or `127.0.0.1`).
+- `VITE_API_URL`: Backend endpoint URL (defaults to `http://localhost:8000/predict`).
+- `VITE_DB_URL`: PostgreSQL connection string (defaults to `postgresql://niot:oceanpass@localhost:5432/marinex_db`).
+- `SEASENTINEL_MODEL_PATH`: Absolute or relative path to your trained YOLOv8 weights (e.g. `weights/best.pt`).
+
+### Step 5: Model Weights Setup
+Trained model weights are kept out of ordinary Git commits to preserve repository speed.
+1. Place the trained `best.pt` model file into the `weights/` folder:
    ```bash
-   git clone https://github.com/AyushB9211/aqua-sentinel-ai.git
-   cd aqua-sentinel-ai
+   mkdir -p weights
+   # Copy best.pt into weights/best.pt
    ```
+2. The backend automatically searches in this order:
+   - `SEASENTINEL_MODEL_PATH` environment variable
+   - `./weights/best.pt`
+   - `./model/seasentinel_shipwreck.pt`
+   - `./model/best.pt`
+   - Base `yolov8n.pt`
 
-2. **Install Frontend Dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Install Backend Dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Step 6: (Optional) PostgreSQL Database Setup
+If using persistent telemetry logs:
+```bash
+# In PostgreSQL terminal:
+CREATE USER niot WITH PASSWORD 'oceanpass';
+CREATE DATABASE marinex_db OWNER niot;
+```
 
 ---
 
-## 7. How to Run the Frontend
+## 7. How to Run the Application
 
-Start the Vite development server:
+### Option A: Running Both Concurrently
+Start the backend first, then the frontend:
+
+**Terminal 1 (FastAPI Backend):**
+```bash
+python backend_main.py
+# or:
+uvicorn backend_main:app --host 127.0.0.1 --port 8000 --reload
+```
+Interactive Swagger docs: `http://127.0.0.1:8000/docs`
+
+**Terminal 2 (React / Vite Frontend):**
 ```bash
 npm run dev
 ```
-The application will be accessible at `http://localhost:3000` (or `http://localhost:5173`).
-
-To build for production:
-```bash
-npm run build
-```
+The website will open at `http://localhost:3000`.
 
 ---
 
-## 8. How to Run the Backend
+## 8. Five-Class Marine Hazard Support
 
-Start the FastAPI inference backend server:
-```bash
-python backend_main.py
-```
-Or via Uvicorn directly:
-```bash
-uvicorn backend_main:app --host 127.0.0.1 --port 8000 --reload
-```
-Interactive API documentation will be available at `http://127.0.0.1:8000/docs`.
+SeaSentinel AI supports automated detection and morphological verification of 5 distinct underwater hazard classes:
+- **`0: CRAB_POT`** (`#f97316`, Orange) — Benthic rectilinear cage traps.
+- **`1: SUBMARINE_PIPELINE`** (`#06b6d4`, Cyan) — Continuous linear conduit infrastructure with flange joints.
+- **`2: SHIPWRECK`** (`#ef4444`, Red) — Large sunken vessel hulls and structural debris.
+- **`3: GHOST_NET`** (`#10b981`, Emerald) — Tangled abandoned/lost derelict fishing gear (ALDFG).
+- **`4: MINE_CYLINDER`** (`#d946ef`, Fuchsia) — Compact cylindrical ordnance and casing anomalies.
 
 ---
 

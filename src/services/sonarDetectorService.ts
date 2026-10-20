@@ -56,7 +56,7 @@ export async function analyzeSonarFile(
       file: file || undefined,
       imageUri: metadata.imageUrl,
       metadata,
-      confidenceThreshold: 0.20,
+      confidenceThreshold: 0.15,
     },
     onProgress
   );
@@ -66,14 +66,25 @@ export async function analyzeSonarImage(
   request: SonarAnalysisRequest,
   onProgress?: (progress: number, stageText: string) => void
 ): Promise<SonarAnalysisResponse> {
-  const confThreshold = request.confidenceThreshold || 0.20;
+  const confThreshold = request.confidenceThreshold || 0.15;
   const startTime = Date.now();
 
+  let fileToUpload = request.file;
+  if (!fileToUpload && request.imageUri && (request.imageUri.startsWith('blob:') || request.imageUri.startsWith('data:') || request.imageUri.startsWith('http'))) {
+    try {
+      const res = await fetch(request.imageUri);
+      const blob = await res.blob();
+      fileToUpload = new File([blob], 'sonar_scan.png', { type: blob.type || 'image/png' });
+    } catch (e) {
+      console.warn('Could not convert imageUri to File for backend inference:', e);
+    }
+  }
+
   // 1. Send uploaded File directly to the live FastAPI YOLO backend if available
-  if (request.file) {
+  if (fileToUpload) {
     try {
       const formData = new FormData();
-      formData.append('file', request.file);
+      formData.append('file', fileToUpload);
 
       let currentProgress = 0;
       const progressTimer = setInterval(() => {
@@ -86,10 +97,10 @@ export async function analyzeSonarImage(
       }, 60);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout for CPU multi-scale inference
 
       const apiResponse = await fetch(
-        `${BACKEND_API_URL}?confidence_threshold=${confThreshold}&tile_size=512&tile_overlap=0.40&iou_threshold=0.35`,
+        `${BACKEND_API_URL}?confidence_threshold=${confThreshold}&tile_size=640&tile_overlap=0.25&iou_threshold=0.35`,
         {
           method: 'POST',
           body: formData,
@@ -113,8 +124,9 @@ export async function analyzeSonarImage(
           timestamp: new Date().toISOString(),
           timeString: '10:24 AM',
           missionId: request.metadata.surveyCode || 'MS-0048',
-          classification: d.classification || 'SHIPWRECK',
-          objectType: d.objectType || 'Shipwreck Structure',
+          classId: d.class_id,
+          classification: d.classification || 'ANOMALY',
+          objectType: d.objectType || (d.classification ? d.classification.replace(/_/g, ' ') : 'Acoustic Anomaly'),
           severity: d.severity || 'high',
           priority: d.priority || 'HIGH',
           confidence: d.confidence,
@@ -152,7 +164,8 @@ export async function analyzeSonarImage(
           y: d.box?.y ?? 0,
           width: d.box?.width ?? 10,
           height: d.box?.height ?? 10,
-          label: d.classification || 'SHIPWRECK',
+          classId: d.class_id,
+          label: d.classification || 'ANOMALY',
           severity: d.severity || 'high',
           priority: d.priority || 'HIGH',
           confidence: d.confidence,
@@ -184,7 +197,13 @@ export async function analyzeSonarImage(
 
         return {
           scanMetadata: request.metadata,
-          detectedCase: detections.length > 0 ? 'shipwreck' : 'unknown',
+          detectedCase: (function() {
+            const top = (detections[0]?.classification || '').toLowerCase();
+            if (top.includes('pipe')) return 'pipe';
+            if (top.includes('net') || top.includes('mine') || top.includes('pot') || top.includes('debris')) return 'debris';
+            if (top.includes('wreck') || top.includes('ship')) return 'shipwreck';
+            return detections.length > 0 ? 'debris' : 'unknown';
+          })(),
           detections,
           boundingBoxes,
           summary,
