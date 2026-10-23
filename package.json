@@ -1,0 +1,11 @@
+{
+  "name": "seasentinel-ai-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SeaSentinel AI Monorepo Root Workspace",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "preview": "npm --prefix frontend run preview"
+  }
+}
