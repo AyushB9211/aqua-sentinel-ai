@@ -107,6 +107,34 @@ CLASS_METADATA = {
     }
 }
 
+
+def check_database_status():
+    """Checks PostgreSQL / PostGIS database connectivity if configured."""
+    db_url = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL")
+    if not db_url:
+        return {"configured": False, "status": "stateless_in_memory", "message": "Stateless mode: DATABASE_URL not set"}
+    try:
+        import psycopg2
+        conn = psycopg2.connect(db_url, connect_timeout=3)
+        conn.close()
+        return {"configured": True, "status": "connected", "message": "PostgreSQL database connection verified"}
+    except ImportError:
+        import urllib.parse
+        import socket
+        try:
+            parsed = urllib.parse.urlparse(db_url)
+            host = parsed.hostname
+            port = parsed.port or 5432
+            if host:
+                sock = socket.create_connection((host, port), timeout=3)
+                sock.close()
+                return {"configured": True, "status": "reachable", "message": f"PostgreSQL host {host}:{port} reachable"}
+        except Exception as e:
+            return {"configured": True, "status": "unreachable", "message": str(e)}
+        return {"configured": True, "status": "configured", "message": "DATABASE_URL present"}
+    except Exception as e:
+        return {"configured": True, "status": "error", "message": str(e)}
+
 app = FastAPI(
     title="SeaSentinel AI Sonar Detection Backend",
     description="Multi-Scale AI Backend for Automated Underwater Marine Debris, Hazard and Shipwreck Detection (SIH 26057)",
@@ -137,9 +165,13 @@ def get_model():
     candidates = [
         os.environ.get("SEASENTINEL_MODEL_PATH"),
         os.path.join(os.path.dirname(__file__), "weights", "best.pt"),
-        os.path.join(os.path.dirname(__file__), "model", "seasentinel_shipwreck.pt"),
+        os.path.join(os.path.dirname(__file__), "..", "model", "best.pt"),
+        os.path.join(os.getcwd(), "model", "best.pt"),
+        os.path.join(os.getcwd(), "backend", "weights", "best.pt"),
         os.path.join(os.path.dirname(__file__), "model", "best.pt"),
+        os.path.join(os.path.dirname(__file__), "best.pt"),
         DEFAULT_EXP2_PATH,
+        os.path.join(os.path.dirname(__file__), "model", "seasentinel_shipwreck.pt"),
         FALLBACK_EXP1_PATH,
         FALLBACK_BASELINE_PATH,
         LEGACY_MODEL_PATH,
@@ -378,6 +410,7 @@ def find_nadir_and_bounds(img):
 @app.get("/health")
 def health_check():
     m = get_model()
+    db_info = check_database_status()
     return {
         "status": "operational",
         "service": "SeaSentinel AI Multi-Scale Sonar Intelligence API",
@@ -385,7 +418,8 @@ def health_check():
         "model_file": _active_model_path,
         "inference_engine": "Dual-Channel Swath-Aware Multi-Scale AI Engine",
         "model_ready": True,
-        "supported_classes": m.names if hasattr(m, "names") else list(CLASS_METADATA.keys())
+        "supported_classes": m.names if hasattr(m, "names") else list(CLASS_METADATA.keys()),
+        "database": db_info
     }
 
 @app.post("/predict")
@@ -690,4 +724,5 @@ async def predict_sonar_image(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)

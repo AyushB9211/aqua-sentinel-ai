@@ -1,3 +1,14 @@
+---
+title: SeaSentinel AI Multi-Scale Sonar Intelligence
+emoji: 🚢
+colorFrom: blue
+colorTo: cyan
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+
 # Aqua Sentinel AI
 
 > **AI-Powered Automated Underwater Marine Debris and Anomaly Detection System using Side-Scan Sonar Imagery**
