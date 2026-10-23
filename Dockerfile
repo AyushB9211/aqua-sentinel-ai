@@ -5,7 +5,7 @@ FROM python:3.10-slim
 # Prevent Python from writing .pyc files and enable unbuffered logging
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PORT=7860 \
+    PORT=8080 \
     HOME=/home/user
 
 # Install essential system libraries for OpenCV headless and PyTorch
@@ -40,12 +40,12 @@ RUN chown -R user:user /app /home/user
 
 USER user
 
-# Expose container port (Default 7860 for Hugging Face Spaces)
-EXPOSE 7860
+# Expose container port (Default 8080 for Cloud Run)
+EXPOSE 8080
 
 # Health check to ensure model is loaded and ready
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:7860/health || exit 1
+    CMD curl -f http://localhost:8080/health || exit 1
 
 # Start FastAPI backend server
-CMD ["sh", "-c", "python -m uvicorn backend_main:app --host 0.0.0.0 --port ${PORT:-7860}"]
+CMD ["sh", "-c", "python -m uvicorn backend_main:app --host 0.0.0.0 --port ${PORT:-8080}"]
