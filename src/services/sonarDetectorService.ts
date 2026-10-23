@@ -39,7 +39,10 @@ export const DETECTOR_PROCESSING_STAGES = [
   'Analysis complete',
 ];
 
-const BACKEND_API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/predict';
+const RAW_BACKEND_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/predict').trim().replace(/\/+$/, '');
+const BACKEND_API_URL = RAW_BACKEND_URL.endsWith('/predict') || RAW_BACKEND_URL.endsWith('/infer')
+  ? RAW_BACKEND_URL
+  : `${RAW_BACKEND_URL}/predict`;
 
 /**
  * Universal AI Object Detector Interface for AquaSentinel AI (SIH 26057).

@@ -1,0 +1,17 @@
+node_modules
+frontend
+dist
+.git
+.github
+.gemini
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.venv
+venv
+runs
+training
+*.log
+scratch
+start_*.bat
