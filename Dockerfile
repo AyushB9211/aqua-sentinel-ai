@@ -25,7 +25,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Install application dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
 
 # Copy backend code, models, and weights
 COPY backend ./backend
@@ -48,4 +48,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:7860/health || exit 1
 
 # Start FastAPI backend server
-CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-7860}"]
+CMD ["sh", "-c", "python -m uvicorn backend_main:app --host 0.0.0.0 --port ${PORT:-7860}"]
